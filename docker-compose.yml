@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  nginx:
+    build: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      service1:
+        condition: service_healthy
+      service2:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  service1:
+    build: ./service_1
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+  service2:
+    build: ./service_2
+    expose:
+      - "8002"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
